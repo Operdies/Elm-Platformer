@@ -57,9 +57,38 @@ subscriptions model =
 
 -- VIEW
 
+figure : Model -> Element
+figure model = 
+  let
+    headSize =
+      40
+    torsoWidth =
+      60
+    torsoHeight =
+      100
+    legLength =
+      80
+    legWidth = 
+      20
+  
+  in
+    collage 400 400
+      [ rect legWidth legLength
+          |> filled (rgb 0 100 0)
+          |> move (torsoWidth / 2, -torsoHeight + 25)
+          |> rotate (degrees 15)
+      , rect legWidth legLength
+          |> filled (rgb 0 0 100)
+          |> move (-(torsoWidth / 2), -torsoHeight + 25)
+          |> rotate (degrees -15)
+      ,  rect torsoWidth torsoHeight
+          |> filled (rgb 100 0 0)       
+      , circle headSize
+          |> filled (rgb 0 0 0)
+          |> move (0, headSize * 2)      
+      ]
+
+
 view : Model -> Html Msg
-view model = collage 300 300
-               [ rect 50 50
-                   |> filled (rgb 0 0 0)
-               ] |> toHtml
+view model = figure model |> toHtml
 
