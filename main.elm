@@ -34,6 +34,7 @@ boundX : Float
 boundX = (toFloat (Tuple.first collageSize) / 2) - 120
 
 type Movement = Left | Right | None
+type MoveKey = Up | Down
   
 type alias Model = 
   { velocity : Float
@@ -41,10 +42,12 @@ type alias Model =
   , y : Float
   , vy : Float  
   , movement : Movement
+  , leftKey : Float
+  , rightKey : Float
   }
 
 init : (Model, Cmd Msg)
-init = (Model 0 -500 0 0 None, Cmd.none)
+init = (Model 0 -500 0 0 None 0 0, Cmd.none)
 
 -- UPDATE
 
@@ -61,10 +64,14 @@ applyPhysics model dt =
       newPosition model.y model.vy
 
     getVelocity =
-      case model.movement of
-        Left -> -1
-        Right -> 1
-        None -> model.velocity * 0.85
+      let 
+        speed = model.rightKey - model.leftKey
+      in 
+        if speed /= 0 then speed else model.velocity * 0.85
+      -- case model.movement of
+      --   Left -> -1
+      --   Right -> 1
+      --   None -> model.velocity
 
     testCollision newValue bound =
       if
@@ -96,9 +103,9 @@ keyUp : KeyCode -> Model -> Model
 keyUp keyCode model =
   case (fromCode keyCode) of
     ArrowRight ->
-      updateVelocity None model -- updateVelocity 0 model
+      updateVelocity Right Up model -- updateVelocity 0 model
     ArrowLeft ->
-      updateVelocity None model -- updateVelocity 0 model
+      updateVelocity Left Up model -- updateVelocity 0 model
     Space -> 
       model
     UpArrow ->
@@ -112,9 +119,9 @@ keyDown : KeyCode -> Model -> Model
 keyDown keyCode model =
   case (fromCode keyCode) of
     ArrowRight ->
-      updateVelocity Right model
+      updateVelocity Right Down model
     ArrowLeft ->
-      updateVelocity Left model
+      updateVelocity Left Down model
     Space -> 
       model
     UpArrow ->
@@ -124,8 +131,16 @@ keyDown keyCode model =
     _ ->
       model
 
-updateVelocity : Movement -> Model -> Model
-updateVelocity direction model = {model | movement = direction}
+updateVelocity : Movement -> MoveKey -> Model -> Model
+updateVelocity direction moveKey model = 
+  case direction of
+    Right ->
+      { model | rightKey = if moveKey == Up then 0 else 1 }
+    Left ->
+      { model | leftKey = if moveKey == Up then 0 else 1}
+    None ->
+      model
+--{model | movement = direction}
 
 updateVertical : Float -> Model -> Model
 updateVertical newVertical model = {model | vy = newVertical}
